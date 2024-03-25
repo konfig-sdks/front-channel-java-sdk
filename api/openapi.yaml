@@ -1,0 +1,490 @@
+openapi: 3.0.0
+info:
+  contact:
+    name: Front Platform
+    url: https://community.front.com
+  description: |-
+    Front is a customer operations platform that enables support, sales, and account management teams to deliver exceptional service at scale. Front streamlines customer communication by combining the efficiency of a help desk and the familiarity of email, with automated workflows and real-time collaboration behind the scenes.
+
+    With Front, teams can centralize messages across channels, route them to the right person, and unlock visibility and insights across all of their customer operations. More than 8000 businesses use Front to drive operational efficiency that prevents churn, improves retention, and propels customer growth.
+  title: Channel API
+  version: 1.0.0
+  x-konfig-has-globally-required-security: true
+servers:
+- url: https://api2.frontapp.com
+security:
+- http: []
+tags:
+- name: Messages
+- name: Channels
+paths:
+  /channels/{channel_id}:
+    patch:
+      description: Update a channel.
+      operationId: Channels_updateChannel
+      parameters:
+      - description: "The Channel ID. Alternatively, you can supply the channel address\
+          \ as a [resource alias](https://dev.frontapp.com/docs/resource-aliases-1)."
+        explode: false
+        in: path
+        name: channel_id
+        required: true
+        schema:
+          default: cha_123
+          example: cha_123
+          type: string
+          x-konfig-original-example: cha_123
+          x-konfig-generated-schema: konfig-generated-schema-paths--channels-channel_id-patch-parameters-0-schema
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChannel'
+        description: Channel details
+      responses:
+        "204":
+          description: No content
+      summary: Update Channel
+      tags:
+      - Channels
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-patch--channels-channel_id
+      x-content-type: application/json
+      x-accepts: application/json
+  /channels/{channel_id}/inbound_messages:
+    post:
+      description: Import a message that was received by the channel.
+      operationId: Messages_importReceivedMessage
+      parameters:
+      - description: "The channel ID. Alternatively, you can supply the channel address\
+          \ as a [resource alias](https://dev.frontapp.com/docs/resource-aliases-1)."
+        explode: false
+        in: path
+        name: channel_id
+        required: true
+        schema:
+          default: cha_123
+          example: cha_123
+          type: string
+          x-konfig-original-example: cha_123
+          x-konfig-generated-schema: konfig-generated-schema-paths--channels-channel_id-inbound_messages-post-parameters-0-schema
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboundMessage'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessagesImportReceivedMessageResponse'
+          description: An accepted message
+      summary: Sync inbound message
+      tags:
+      - Messages
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-post--channels-channel_id-inbound_messages
+      x-content-type: application/json
+      x-accepts: application/json
+  /channels/{channel_id}/outbound_messages:
+    post:
+      description: Import a message that was sent from the channel.
+      operationId: Messages_importSyncedMessage
+      parameters:
+      - description: "The channel ID. Alternatively, you can supply the channel address\
+          \ as a [resource alias](https://dev.frontapp.com/docs/resource-aliases-1)."
+        explode: false
+        in: path
+        name: channel_id
+        required: true
+        schema:
+          default: cha_123
+          example: cha_123
+          type: string
+          x-konfig-original-example: cha_123
+          x-konfig-generated-schema: konfig-generated-schema-paths--channels-channel_id-outbound_messages-post-parameters-0-schema
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutboundMessage'
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessagesImportReceivedMessageResponse'
+          description: An accepted message
+      summary: Sync outbound message
+      tags:
+      - Messages
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-post--channels-channel_id-outbound_messages
+      x-content-type: application/json
+      x-accepts: application/json
+components:
+  responses:
+    acceptedMessage:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MessagesImportReceivedMessageResponse'
+      description: An accepted message
+  schemas:
+    InboundMessage:
+      example:
+        metadata:
+          external_id: external_id
+          external_conversation_id: external_conversation_id
+        attachments:
+        - ""
+        - ""
+        sender:
+          name: name
+          handle: handle
+        subject: subject
+        body: body
+        delivered_at: 0
+      properties:
+        sender:
+          $ref: '#/components/schemas/InboundMessage_sender'
+        subject:
+          description: Subject of the message
+          type: string
+        body:
+          description: Body of the message
+          type: string
+        metadata:
+          $ref: '#/components/schemas/InboundMessage_metadata'
+        delivered_at:
+          description: Time in seconds at which message was created in external system
+          type: integer
+        attachments:
+          description: "Binary data of attached files. Must use `Content-Type: multipart/form-data`\
+            \ if specified. See [example](https://gist.github.com/hdornier/e04d04921032e98271f46ff8a539a4cb)\
+            \ or read more about [Attachments](https://dev.frontapp.com/docs/attachments-1).\
+            \  Max 25 MB."
+          items:
+            format: binary
+            type: string
+          type: array
+      required:
+      - body
+      - metadata
+      - sender
+    OutboundMessage:
+      description: Payload to receive an outbound message from an external system
+        into Front.
+      example:
+        metadata:
+          external_id: external_id
+          external_conversation_id: external_conversation_id
+        attachments:
+        - ""
+        - ""
+        subject: subject
+        sender_name: sender_name
+        to:
+        - name: name
+          handle: handle
+        - name: name
+          handle: handle
+        author_id: author_id
+        body: body
+        delivered_at: 0
+      properties:
+        sender_name:
+          description: Name of the sender
+          type: string
+        to:
+          description: Data of the message recipient
+          items:
+            $ref: '#/components/schemas/OutboundMessage_to_inner'
+          type: array
+        subject:
+          description: Subject of the message
+          type: string
+        author_id:
+          description: ID of the teammate on behalf of whom the message is sent
+          type: string
+        body:
+          description: Body of the message
+          type: string
+        metadata:
+          $ref: '#/components/schemas/InboundMessage_metadata'
+        delivered_at:
+          description: Time in seconds at which message was created in external system
+          type: integer
+        attachments:
+          description: "Binary data of attached files. Must use `Content-Type: multipart/form-data`\
+            \ if specified. See [example](https://gist.github.com/hdornier/e04d04921032e98271f46ff8a539a4cb)\
+            \ or read more about [Attachments](https://dev.frontapp.com/docs/attachments-1).\
+            \  Max 25 MB."
+          items:
+            format: binary
+            type: string
+          type: array
+      required:
+      - body
+      - metadata
+      - to
+    UpdateChannel:
+      example:
+        status: offline
+      properties:
+        status:
+          description: Status of the channel
+          enum:
+          - offline
+          - ok
+          type: string
+    MessagesImportReceivedMessageResponse:
+      example:
+        message_uid: message_uid
+        status: accepted
+      properties:
+        status:
+          default: accepted
+          example: accepted
+          type: string
+          x-konfig-original-example: accepted
+          x-konfig-generated-schema: konfig-generated-schema-components-schemas-MessagesImportReceivedMessageResponse-properties-status
+        message_uid:
+          description: Message unique identifier
+          type: string
+      type: object
+      x-konfig-is-used-in-successful-response: true
+    konfig-generated-schema-paths--channels-channel_id-patch-parameters-0-schema:
+      example: cha_123
+      type: string
+      x-do-not-generate: true
+    konfig-generated-schema-paths--channels-channel_id-inbound_messages-post-parameters-0-schema:
+      example: cha_123
+      type: string
+      x-do-not-generate: true
+    konfig-generated-schema-paths--channels-channel_id-outbound_messages-post-parameters-0-schema:
+      example: cha_123
+      type: string
+      x-do-not-generate: true
+    konfig-generated-schema-components-schemas-MessagesImportReceivedMessageResponse-properties-status:
+      example: accepted
+      type: string
+      x-do-not-generate: true
+    konfig-generated-schema-single-parameter-schema-patch--channels-channel_id:
+      properties:
+        channel_id:
+          default: cha_123
+          example: cha_123
+          type: string
+          x-konfig-original-example: cha_123
+          x-konfig-generated-schema: konfig-generated-schema-paths--channels-channel_id-patch-parameters-0-schema
+        status:
+          description: Status of the channel
+          enum:
+          - offline
+          - ok
+          type: string
+      required:
+      - channel_id
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - channel_id
+    konfig-generated-schema-single-parameter-schema-post--channels-channel_id-inbound_messages:
+      properties:
+        channel_id:
+          default: cha_123
+          example: cha_123
+          type: string
+          x-konfig-original-example: cha_123
+          x-konfig-generated-schema: konfig-generated-schema-paths--channels-channel_id-inbound_messages-post-parameters-0-schema
+        sender:
+          description: Data of the sender
+          properties:
+            name:
+              description: Name of the sender
+              type: string
+            handle:
+              description: Handle of the sender. It can be any string used to uniquely
+                identify the sender
+              type: string
+          required:
+          - handle
+          type: object
+        subject:
+          description: Subject of the message
+          type: string
+        body:
+          description: Body of the message
+          type: string
+        metadata:
+          properties:
+            external_id:
+              description: External identifier of the message
+              maxLength: 200
+              type: string
+            external_conversation_id:
+              description: External identifier of the conversation. Will be used to
+                thread messages.
+              maxLength: 200
+              type: string
+          required:
+          - external_conversation_id
+          - external_id
+          type: object
+        delivered_at:
+          description: Time in seconds at which message was created in external system
+          type: integer
+        attachments:
+          description: "Binary data of attached files. Must use `Content-Type: multipart/form-data`\
+            \ if specified. See [example](https://gist.github.com/hdornier/e04d04921032e98271f46ff8a539a4cb)\
+            \ or read more about [Attachments](https://dev.frontapp.com/docs/attachments-1).\
+            \  Max 25 MB."
+          items:
+            format: binary
+            type: string
+          type: array
+      required:
+      - body
+      - channel_id
+      - metadata
+      - sender
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - channel_id
+    konfig-generated-schema-single-parameter-schema-post--channels-channel_id-outbound_messages:
+      properties:
+        channel_id:
+          default: cha_123
+          example: cha_123
+          type: string
+          x-konfig-original-example: cha_123
+          x-konfig-generated-schema: konfig-generated-schema-paths--channels-channel_id-outbound_messages-post-parameters-0-schema
+        sender_name:
+          description: Name of the sender
+          type: string
+        to:
+          description: Data of the message recipient
+          items:
+            properties:
+              name:
+                description: Name of the recipient
+                type: string
+              handle:
+                description: Handle of the recipient. It can be any string used to
+                  uniquely identify the sender
+                type: string
+            required:
+            - handle
+            type: object
+          type: array
+        subject:
+          description: Subject of the message
+          type: string
+        author_id:
+          description: ID of the teammate on behalf of whom the message is sent
+          type: string
+        body:
+          description: Body of the message
+          type: string
+        metadata:
+          properties:
+            external_id:
+              description: External identifier of the message
+              maxLength: 200
+              type: string
+            external_conversation_id:
+              description: External identifier of the conversation. Will be used to
+                thread messages.
+              maxLength: 200
+              type: string
+          required:
+          - external_conversation_id
+          - external_id
+          type: object
+        delivered_at:
+          description: Time in seconds at which message was created in external system
+          type: integer
+        attachments:
+          description: "Binary data of attached files. Must use `Content-Type: multipart/form-data`\
+            \ if specified. See [example](https://gist.github.com/hdornier/e04d04921032e98271f46ff8a539a4cb)\
+            \ or read more about [Attachments](https://dev.frontapp.com/docs/attachments-1).\
+            \  Max 25 MB."
+          items:
+            format: binary
+            type: string
+          type: array
+      required:
+      - body
+      - channel_id
+      - metadata
+      - to
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - channel_id
+    InboundMessage_sender:
+      description: Data of the sender
+      example:
+        name: name
+        handle: handle
+      properties:
+        name:
+          description: Name of the sender
+          type: string
+        handle:
+          description: Handle of the sender. It can be any string used to uniquely
+            identify the sender
+          type: string
+      required:
+      - handle
+      type: object
+    InboundMessage_metadata:
+      example:
+        external_id: external_id
+        external_conversation_id: external_conversation_id
+      properties:
+        external_id:
+          description: External identifier of the message
+          maxLength: 200
+          type: string
+        external_conversation_id:
+          description: External identifier of the conversation. Will be used to thread
+            messages.
+          maxLength: 200
+          type: string
+      required:
+      - external_conversation_id
+      - external_id
+      type: object
+    OutboundMessage_to_inner:
+      example:
+        name: name
+        handle: handle
+      properties:
+        name:
+          description: Name of the recipient
+          type: string
+        handle:
+          description: Handle of the recipient. It can be any string used to uniquely
+            identify the sender
+          type: string
+      required:
+      - handle
+      type: object
+  securitySchemes:
+    http:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+      x-konfig-globally-required-security: true
+x-api-id: front
+x-explorer-enabled: false
+x-proxy-enabled: true
+x-samples-enabled: true
+
